@@ -343,7 +343,7 @@ public class Activity_Note extends Activity implements View.OnClickListener{
 
         saveNoteToDB();
 
-
+        readNotesFromDB();
 
         Intent intent = new Intent();
         intent.putExtra("note", note);
@@ -366,6 +366,52 @@ public class Activity_Note extends Activity implements View.OnClickListener{
         // вставляем запись и получаем ее ID
         long rowID = db.insert(tableName, null, cv);
         Log.d("myLogs", "row inserted, ID = " + rowID);
+
+        dbHelper.close();
+    }
+
+    void readNotesFromDB() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        Log.d("myLogs", "--- Rows in mytable: ---");
+        // делаем запрос всех данных из таблицы mytable, получаем Cursor
+        Cursor c = db.query(tableName, null, null, null, null, null, null);
+
+        // ставим позицию курсора на первую строку выборки
+        // если в выборке нет строк, вернется false
+        if (c.moveToFirst()) {
+
+            // определяем номера столбцов по имени в выборке
+            int nameColIndex = c.getColumnIndex("name");
+            int skuColIndex = c.getColumnIndex("sku");
+            int categoryColIndex = c.getColumnIndex("category");
+            int descriptionColIndex = c.getColumnIndex("description");
+
+            do {
+                // получаем значения по номерам столбцов и пишем все в лог
+                Log.d("myLogs",
+                        "name = " + c.getInt(nameColIndex) +
+                                ", sku = " + c.getString(skuColIndex) +
+                                ", category = " + c.getString(categoryColIndex) +
+                                ", description = " + c.getString(descriptionColIndex));
+                // переход на следующую строку
+                // а если следующей нет (текущая - последняя), то false - выходим из цикла
+            } while (c.moveToNext());
+        } else
+            Log.d("myLogs", "0 rows");
+        c.close();
+
+        dbHelper.close();
+    }
+
+    void deleteAllRowsFromDB() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+
+        Log.d("myLogs", "--- Clear mytable: ---");
+        // удаляем все записи
+        int clearCount = db.delete("mytable", null, null);
+        Log.d("myLogs", "deleted rows count = " + clearCount);
 
         dbHelper.close();
     }

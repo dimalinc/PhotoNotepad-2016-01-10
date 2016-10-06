@@ -154,8 +154,6 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
     @Override
     protected void onPause() {
         super.onPause();
-
-
     }
 
 
