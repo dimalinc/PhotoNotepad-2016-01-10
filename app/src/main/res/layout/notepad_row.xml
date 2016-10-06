@@ -1,0 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+
+    <TextView
+        android:id="@+id/tvNotepadName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView1" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/tvNotepadDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:text="TextView2" >
+    </TextView>
+
+</LinearLayout>

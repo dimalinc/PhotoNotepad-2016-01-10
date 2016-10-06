@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">JustCapture</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="capture">Capture</string>
+    <string name="menu_settings">Menu Settings</string>
+    <string name="recapture">Recapture</string>
+    <string name="finish">Finish</string>
+    <string name="title_activity_note">NoteActivity</string>
+    <string name="title_activity_notes_list">NotesListActivity</string>
+    <string name="title_activity_notepad_select">NotepadSelectActivityFULL_APP</string>
+    <string name="title_activity_activity_just_capture">ActivityJustCapture</string>
+    <string name="title_activity_activity_notepad_select">ActivityNotepadSelect</string>
+    <string name="title_activity_activity__notes__list">Activity_Notes_List</string>
+    <string name="title_activity_activity__just__capture">Activity_Just_Capture</string>
+
+</resources>
