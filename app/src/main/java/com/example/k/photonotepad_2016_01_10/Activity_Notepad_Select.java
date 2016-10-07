@@ -23,9 +23,12 @@ import java.io.File;
 import java.util.ArrayList;
 
 
-public class Activity_Notepad_Select extends Activity implements View.OnClickListener{
+public class Activity_Notepad_Select extends Activity implements View.OnClickListener {
 
-   static Helper_DB dbHelper;
+    Helper_DB dbHelper = new Helper_DB(this);
+    //   SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+    final static String tableName = "notepads_Table";
 
     public static final String APP_PREFERENCES = "mysettings";
     public static final String APP_PREFERENCES_NOTEPADS_LIST = "notepadsList";
@@ -33,13 +36,13 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
     final static int REQUEST_CODE_NEW_NOTEPAD = 5;
 
-    final String noteListSerializeFilename = Activity_Note.programDirectoryName + File.separator + APP_PREFERENCES_NOTEPADS_LIST+".ser";
+    final String noteListSerializeFilename = Activity_Note.programDirectoryName + File.separator + APP_PREFERENCES_NOTEPADS_LIST + ".ser";
 
-   static ListAdapter adapter ;
-   static ListView listView;
+    static ListAdapter adapter;
+    static ListView listView;
     Button btnAddNotepad, btnDeleteAllNotepads;
 
-    public static ArrayList<Notepad> notePadsList= new ArrayList<>();
+    public static ArrayList<Notepad> notePadsList = new ArrayList<>();
 
 
     @Override
@@ -47,9 +50,9 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notepad_select);
         // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-       // setSupportActionBar(toolbar);
+        // setSupportActionBar(toolbar);
 
-        dbHelper = new Helper_DB(this);
+        //  dbHelper = new Helper_DB(this);
 
        /* SQLiteDatabase db = openOrCreateDatabase("db",MODE_PRIVATE,null);
         db.execSQL("CREATE TABLE IF NOT EXISTS TutorialsPoint(Username VARCHAR,Password VARCHAR);");
@@ -62,14 +65,14 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 
-        btnAddNotepad = (Button)findViewById(R.id.buttonAddNotepad);
-        btnDeleteAllNotepads = (Button)findViewById(R.id.buttonDeleteAlNotepads);
+        btnAddNotepad = (Button) findViewById(R.id.buttonAddNotepad);
+        btnDeleteAllNotepads = (Button) findViewById(R.id.buttonDeleteAlNotepads);
         btnAddNotepad.setOnClickListener(this);
         btnDeleteAllNotepads.setOnClickListener(this);
 
         listView = (ListView) findViewById(R.id.listView);
 
-        Notepad.notePadsListInit();
+        notePadsListInit();
 
         adapterInit();
 
@@ -90,10 +93,97 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
     }
 
+    void readNotepadsFromDB() {
+
+        // подключаемся к БД
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+
+        Log.d("myLogs", "--- read Rows in notepads_Table: ---");
+        // делаем запрос всех данных из таблицы  notepads_Table, получаем Cursor
+        Cursor c = db.query(tableName, null, null, null, null, null, null);
+
+        // ставим позицию курсора на первую строку выборки
+        // если в выборке нет строк, вернется false
+        if (c.moveToFirst()) {
+
+            // определяем номера столбцов по имени в выборке
+            int idColIndex = c.getColumnIndex("id");
+            int nameColIndex = c.getColumnIndex("name");
+            /*int dateCreatedColIndex = c.getColumnIndex("dateCreated");
+            int dateModifiedColIndex = c.getColumnIndex("dateModified");*/
+
+            do {
+
+
+                // получаем значения по номерам столбцов и пишем все в лог
+                Log.d("myLogs",
+                        "ID = " + c.getInt(idColIndex) +
+                                ", name = " + c.getString(nameColIndex)); /*+
+                                ", dateCreated = " + c.getLong(dateCreatedColIndex) +
+                                ", dateModified = " + c.getLong(dateModifiedColIndex));*/
+                // переход на следующую строку
+                // а если следующей нет (текущая - последняя), то false - выходим из цикла
+            } while (c.moveToNext());
+        } else
+            Log.d("myLogs", "0 rows in notepads_Table");
+        c.close();
+    }
+
+    void notePadsListInit() {
+        // подключаемся к БД
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        Log.d("myLogs", "--- read Rows in notepads_Table: ---");
+        // делаем запрос всех данных из таблицы  notepads_Table, получаем Cursor
+        Cursor c = db.query(tableName, null, null, null, null, null, null);
+
+        // ставим позицию курсора на первую строку выборки
+        // если в выборке нет строк, вернется false
+        if (c.moveToFirst()) {
+
+            // определяем номера столбцов по имени в выборке
+            int idColIndex = c.getColumnIndex("id");
+            int nameColIndex = c.getColumnIndex("name");
+           /* int dateCreatedColIndex = c.getColumnIndex("dateCreated");
+            int dateModifiedColIndex = c.getColumnIndex("dateModified");*/
+
+            do {
+                // получаем значения по номерам столбцов и создаем объекты Notepad, добавляем их в notepadsList
+                Log.d("myLogs",
+                        "ID = " + c.getInt(idColIndex) +
+                                ", name = " + c.getString(nameColIndex) /*+
+                                ", dateCreated = " + c.getLong(dateCreatedColIndex) +
+                                ", dateModified = " + c.getLong(dateModifiedColIndex)*/);
+
+                Notepad newNotepad = new Notepad(c.getInt(idColIndex), c.getString(nameColIndex), 0, 0);
+                notePadsList.add(newNotepad);
+
+                // переход на следующую строку
+                // а если следующей нет (текущая - последняя), то false - выходим из цикла
+            } while (c.moveToNext());
+        } else
+            Log.d("myLogs", "0 rows in notepads_Table");
+        c.close();
+    }
+
+    void deleteNotepadsFromDB() {
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        Log.d("myLogs", "--- Clear mytable: ---");
+        // удаляем все записи
+        int clearCount = db.delete(tableName, null, null);
+        Log.d("myLogs", "deleted rows count = " + clearCount);
+
+        adapterInit();
+
+    }
+
     void adapterInit() {
         adapter = new SimpleAdapter(this, Helper_Adapter.createDataArrayList(), R.layout.notepad_row,
-                new String[] { "name", "date" }, new int[] {
-                R.id.tvNotepadName, R.id.tvNotepadDate });
+                new String[]{"name", "date"}, new int[]{
+                R.id.tvNotepadName, R.id.tvNotepadDate});
         listView.setAdapter(adapter);
     }
 
@@ -108,7 +198,7 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
             Notepad gotNotePad = (Notepad) data.getParcelableExtra("notepad");
 
             boolean oldNotepad = false;
-            for (Notepad notePad: notePadsList) {
+            for (Notepad notePad : notePadsList) {
                 if (notePad.id == gotNotePad.id) {
                     oldNotepad = true;
                     break;
@@ -124,13 +214,11 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
             notePadsList = Notepad.readNotepadsListFromFile();
 
 
-
-
             Log.d("myLogs", "gotNotePad read from intent name = " + gotNotePad.name);
 
             // textView.setText(gotNotePad.name);
 
-            Log.d("myLogs","NotePad extracted from parcel" );
+            Log.d("myLogs", "NotePad extracted from parcel");
 
             adapterInit();
         }
@@ -146,6 +234,7 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
                 break;
             case R.id.buttonDeleteAlNotepads:
                 Notepad.deleteAlNotepads();
+                deleteNotepadsFromDB();
                 break;
         }
     }
@@ -162,10 +251,9 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
         super.onResume();
 
         if (mSettings.contains(APP_PREFERENCES_NOTEPADS_LIST)) {
-            Notepad.lastId = mSettings.getInt(APP_PREFERENCES_NOTEPADS_LIST,0);
+            Notepad.lastId = mSettings.getInt(APP_PREFERENCES_NOTEPADS_LIST, 0);
         }
     }
-
 
     void addNotepad() {
 
@@ -177,5 +265,4 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
         startActivityForResult(intent, REQUEST_CODE_NEW_NOTEPAD);
 
     }
-
 }

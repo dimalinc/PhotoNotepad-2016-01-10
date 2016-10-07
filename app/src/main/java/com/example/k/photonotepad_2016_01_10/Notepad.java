@@ -1,7 +1,9 @@
 package com.example.k.photonotepad_2016_01_10;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcel;
@@ -16,6 +18,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class Notepad implements Parcelable {
+
+
 
     public static final String NOTEPADS_LIST_FILE_NAME = "notePadsList.fil";
     public static final String APP_PREFERENCES_LAST_NOTEPAD_ID = "last_notepad_id";
@@ -79,6 +83,8 @@ public class Notepad implements Parcelable {
     static void saveNotepads(ArrayList<Notepad> incomingNotepadsList){
         saveNotePadsToFile(incomingNotepadsList);
     }
+
+
 
     static ArrayList<Notepad> loadNotepads(){
         return readNotepadsListFromFile();
@@ -211,19 +217,17 @@ public class Notepad implements Parcelable {
         for (File file:rootDir.listFiles()) {
             if ( (file.isDirectory()) || ( file.getName().contains(Notepad.NOTEPADS_LIST_FILE_NAME) ) )
                 Helper_File.deleteFileOrDirRecursievely(file);
-
-
         }
 
         Notepad.lastId = 0;
 
         SharedPreferences.Editor editor = mSettings.edit();
         editor.putInt(APP_PREFERENCES_NOTEPADS_LIST, 0);
+        editor.putInt(APP_PREFERENCES_LAST_NOTEPAD_ID, 0);
         editor.apply();
 
-        notePadsList = new ArrayList<>();
+       Activity_Notepad_Select.notePadsList = new ArrayList<>();
       // TODO: проврить нужен ли здесь adapterInit();
-
     }
 
    static void notePadsListInit() {

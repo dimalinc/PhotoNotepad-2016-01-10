@@ -24,6 +24,13 @@ public class Helper_DB extends SQLiteOpenHelper{
                 + "description text"
 
                 + ");");
+
+        db.execSQL("create table " + Activity_Notepad_Select.tableName + " ("
+                + "id integer primary key autoincrement,"
+                + "name text"
+
+
+                + ");");
     }
 
     @Override

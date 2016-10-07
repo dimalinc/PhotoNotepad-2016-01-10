@@ -1,8 +1,10 @@
 package com.example.k.photonotepad_2016_01_10;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
@@ -29,7 +31,9 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
     public static final int ID_DEFAULT_VALUE = -1;
     public static final String APP_PREFERENCES = "mysettings";
     public static final String APP_PREFERENCES_LAST_NOTEPAD_ID = "last_notepad_id";
-    protected static SharedPreferences mSettings;
+    static SharedPreferences mSettings;
+
+   Helper_DB dbHelper = new Helper_DB(this);
 
     static String notepadName;
 
@@ -64,10 +68,6 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
        /* noteList.add(new Note(01,"name123","category123"));
         noteList.add(new Note(02,"name124","category124"));*/
-
-
-
-
 
 
         //TODO write generation of notepadNames
@@ -212,16 +212,42 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
 // TODO: решить, перенести в класс Notepad или оставить здесть
 
+        saveNotepadToDB();
 
         Intent intent = new Intent();
         intent.putExtra("notepad", notepad);
         Log.d("myLogs", "notePad returned as result of NotesListActivity");
         setResult(RESULT_OK, intent);
         finish(); // оставить или убрать?
-        Log.d("myLogs", "finish() called");
+        Log.d("myLogs", "finish() called in saveNotePad()");
+
 
 
     }
+
+    void saveNotepadToDB() {
+        // подключаемся к БД
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        // создаем объект для данных
+        ContentValues cv = new ContentValues();
+
+        Log.d("myLogs", "--- Insert in table_Notepads: ---");
+        // подготовим данные для вставки в виде пар: наименование столбца - значение
+
+        cv.put("id", notepad.id);
+        cv.put("name", notepad.name);
+
+        // вставляем запись и получаем ее ID
+        long rowID = db.insert(Activity_Notepad_Select.tableName, null, cv);
+        Log.d("myLogs", "row inserted in table_Notepads, ID = " + rowID);
+
+        db.close();
+    }
+
+
+
+
 
     @Override
     protected void onPause() {

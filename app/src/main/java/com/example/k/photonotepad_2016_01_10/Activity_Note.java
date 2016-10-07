@@ -31,7 +31,7 @@ public class Activity_Note extends Activity implements View.OnClickListener{
 
 
     Helper_DB dbHelper = new Helper_DB(this);
-  final static String tableName = "first_Table";
+  final static String tableName = "note_Table";
 
     Note note;
     final static String programDirectoryName = "CameraTest";

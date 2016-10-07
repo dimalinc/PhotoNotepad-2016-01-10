@@ -19,6 +19,8 @@ public class Helper_Adapter {
 
     static ArrayList<HashMap<String, Object>> createDataArrayList() {
 
+        notePadsList = Activity_Notepad_Select.notePadsList;
+
         // Упаковываем данные
 
         ArrayList<HashMap<String, Object>> data = new ArrayList<>(
