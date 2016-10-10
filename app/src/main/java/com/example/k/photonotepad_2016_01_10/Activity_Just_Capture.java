@@ -1,13 +1,16 @@
 package com.example.k.photonotepad_2016_01_10;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -18,6 +21,13 @@ import java.io.File;
 import java.io.OutputStream;
 
 public class Activity_Just_Capture extends AppCompatActivity {
+
+    Helper_DB dbHelper = new Helper_DB(Activity_Just_Capture.this);
+
+    final String notesTableName = "notesTable";
+    final String imagesTableName = "imagesTable";
+
+    Note note;
 
     ImageButton capture, recapture, save;
     CameraPreview preview;
@@ -33,6 +43,8 @@ public class Activity_Just_Capture extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_just_capture);
+
+        note = Activity_Note.note;
 
         intent = getIntent();
         //Log.i("MY", intent.getAction());
@@ -168,6 +180,43 @@ public class Activity_Just_Capture extends AppCompatActivity {
         OutputStream os = getContentResolver().openOutputStream(pictureFile);
         os.write(data);
         os.close();
+
+        Data.imagesList.add(pictureFile);
+
+        writeImageDataToDB(pictureFile);
+
+    }
+
+    void writeImageDataToDB(Uri pictureFile) {
+        // создаем объект для данных
+        ContentValues cv = new ContentValues();
+
+        // подключаемся к БД
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        Log.d("myLogs", "--- Insert in " + imagesTableName + ": ---");
+        // подготовим данные для вставки в виде пар: наименование столбца - значение
+
+        cv.put("image_id", pictureFile.toString());
+        cv.put("note_id", note.id);
+        cv.put("pictureFileUri", pictureFile.toString());
+        // вставляем запись и получаем ее ID
+        long rowID = db.insert(imagesTableName + note.id, null, cv);
+        Log.d("myLogs", "row inserted, ID = " + rowID);
+
+        db.close();
+    }
+
+    void readImagesFromDB(Note note) {
+        // создаем объект для данных
+        ContentValues cv = new ContentValues();
+
+
+        // подключаемся к БД
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+
+        db.close();
     }
 
     @Override
@@ -203,7 +252,7 @@ public class Activity_Just_Capture extends AppCompatActivity {
 
         // Проверяем и создаем директорию
 
-        File path = new File(Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName + File.separator + Activity_Notes_List.notepadName + File.separator + Activity_Notes_List.noteIndex);
+        File path = new File(Environment.getExternalStorageDirectory(), Data.programDirectoryName + File.separator + Activity_Notes_List.notepadName + File.separator + Activity_Notes_List.noteIndex);
         if (!path.exists()) {
             if (!path.mkdirs()) {
                 return null;

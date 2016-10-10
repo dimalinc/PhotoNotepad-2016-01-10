@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class Notepad implements Parcelable {
 
-
+    ArrayList<Note> notesList = new ArrayList<>();
 
     public static final String NOTEPADS_LIST_FILE_NAME = "notePadsList.fil";
     public static final String APP_PREFERENCES_LAST_NOTEPAD_ID = "last_notepad_id";
@@ -48,6 +48,14 @@ public class Notepad implements Parcelable {
         this.dateModified = dateModified;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDateModified(long dateModified) {
+        this.dateModified = dateModified;
+    }
+
     public Notepad() {
 
         mSettings = Activity_Notes_List.mSettings;
@@ -63,7 +71,7 @@ public class Notepad implements Parcelable {
     }
 
     void notepadCreateDir(int id) {
-        File path = new File (Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName +
+        File path = new File (Environment.getExternalStorageDirectory(), Data.programDirectoryName +
                 File.separator + "notepad" +  id);
         if (! path.exists()){
             if (!path.mkdirs()) {
@@ -153,7 +161,7 @@ public class Notepad implements Parcelable {
             return null;
 
         // Проверяем и создаем директорию
-        File path = new File(Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName );
+        File path = new File(Environment.getExternalStorageDirectory(), Data.programDirectoryName );
         if (!path.exists()) {
             if (!path.mkdirs()) {
                 return null;
@@ -212,7 +220,7 @@ public class Notepad implements Parcelable {
         // TODO Доработать, чтобы удалялись только данные блокнотов, а не файлы в корневой паке приложения - вроде сделано, проверить
         //deleteFileOrDirRecursievely(new File(Environment.getExternalStorageDirectory(), NoteActivity.programDirectoryName));
 
-        File rootDir = new File(Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName);
+        File rootDir = new File(Environment.getExternalStorageDirectory(), Data.programDirectoryName);
 
         for (File file:rootDir.listFiles()) {
             if ( (file.isDirectory()) || ( file.getName().contains(Notepad.NOTEPADS_LIST_FILE_NAME) ) )
@@ -222,7 +230,7 @@ public class Notepad implements Parcelable {
         Notepad.lastId = 0;
 
         SharedPreferences.Editor editor = mSettings.edit();
-        editor.putInt(APP_PREFERENCES_NOTEPADS_LIST, 0);
+//        editor.putInt(APP_PREFERENCES_NOTEPADS_LIST, 0);
         editor.putInt(APP_PREFERENCES_LAST_NOTEPAD_ID, 0);
         editor.apply();
 

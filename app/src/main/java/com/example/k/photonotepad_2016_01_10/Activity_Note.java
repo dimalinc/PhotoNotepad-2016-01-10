@@ -27,14 +27,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-public class Activity_Note extends Activity implements View.OnClickListener{
+public class Activity_Note extends Activity implements View.OnClickListener {
 
 
     Helper_DB dbHelper = new Helper_DB(this);
-  final static String tableName = "note_Table";
+    final static String tableName = "note_Table";
 
-    Note note;
-    final static String programDirectoryName = "CameraTest";
+  static Note note;
 
     TextView textViewNoteName, textViewPhotoNames;
     EditText etName, etSku, etCategory, etDescription;
@@ -50,9 +49,9 @@ public class Activity_Note extends Activity implements View.OnClickListener{
 
     private Gallery gallery;
     private ImageView bigimage;
-    private Integer[] imgid = { R.drawable.ic_launcher, R.drawable.ic_launcher,
+    private Integer[] imgid = {R.drawable.ic_launcher, R.drawable.ic_launcher,
             R.drawable.ic_launcher, R.drawable.ic_launcher, R.drawable.ic_launcher, R.drawable.ic_launcher,
-            R.drawable.ic_launcher, R.drawable.ic_launcher };
+            R.drawable.ic_launcher, R.drawable.ic_launcher};
 
 
     // adapter for gallery view
@@ -62,7 +61,6 @@ public class Activity_Note extends Activity implements View.OnClickListener{
     String sku;
     String category;
     String description;
-
 
 
     @Override
@@ -83,17 +81,16 @@ public class Activity_Note extends Activity implements View.OnClickListener{
         });*/
 
 
+        note = new Note(Activity_Notes_List.noteIndex);
 
-        note =  new Note(Activity_Notes_List.noteIndex);
-
-        textViewNoteName = (TextView)findViewById(R.id.tvNoteName);
-        textViewPhotoNames = (TextView)findViewById(R.id.tvPhotoNames);
-        etName = (EditText)findViewById(R.id.etName);
-        etSku = (EditText)findViewById(R.id.etId);
-        etCategory = (EditText)findViewById(R.id.etCategory);
-        etDescription = (EditText)findViewById(R.id.etDescription);
-        buttonSaveNote = (Button)findViewById(R.id.buttonSaveNote);
-        buttonTakePicture = (Button)findViewById(R.id.buttonTakePicture);
+        textViewNoteName = (TextView) findViewById(R.id.tvNoteName);
+        textViewPhotoNames = (TextView) findViewById(R.id.tvPhotoNames);
+        etName = (EditText) findViewById(R.id.etName);
+        etSku = (EditText) findViewById(R.id.etId);
+        etCategory = (EditText) findViewById(R.id.etCategory);
+        etDescription = (EditText) findViewById(R.id.etDescription);
+        buttonSaveNote = (Button) findViewById(R.id.buttonSaveNote);
+        buttonTakePicture = (Button) findViewById(R.id.buttonTakePicture);
         //gallery = (Gallery)findViewById(R.id.gallery);
 
         buttonSaveNote.setOnClickListener(new View.OnClickListener() {
@@ -163,7 +160,7 @@ public class Activity_Note extends Activity implements View.OnClickListener{
     }
 
     void takePicture() {
-        Intent intent = new Intent(this,Activity_Just_Capture.class);
+        Intent intent = new Intent(this, Activity_Just_Capture.class);
         startActivityForResult(intent, PHOTO);
     }
 
@@ -200,7 +197,7 @@ public class Activity_Note extends Activity implements View.OnClickListener{
                 String imgPath = "";
 
                 // retrieve the string using media data
-                String[] medData = { MediaStore.Images.Media.DATA };
+                String[] medData = {MediaStore.Images.Media.DATA};
                 // query the data
                 Cursor picCursor = managedQuery(pickedUri, medData, null, null,
                         null);
@@ -293,7 +290,7 @@ public class Activity_Note extends Activity implements View.OnClickListener{
                 "generateNoteDescriptionFileName: " + noteFileName, Toast.LENGTH_SHORT).show();
 
         StringBuilder sb = new StringBuilder();
-        for (String photoName: photosList) {
+        for (String photoName : photosList) {
             sb.append(photoName);
             sb.append(System.getProperty("line.separator"));
         }
@@ -301,7 +298,7 @@ public class Activity_Note extends Activity implements View.OnClickListener{
 
         try {
             String fileName = noteFileName.substring(8);
-            Log.d("myLogs","fileName: " + fileName);
+            Log.d("myLogs", "fileName: " + fileName);
             Toast.makeText(Activity_Note.this,
                     "fileName: " + fileName, Toast.LENGTH_SHORT).show();
 
@@ -309,24 +306,21 @@ public class Activity_Note extends Activity implements View.OnClickListener{
             OutputStream os = new FileOutputStream(fileName);
             os.write(outputString.getBytes());
             os.close();
-            Log.d("myLogs","PhotosList saved to: " + noteFileName);
+            Log.d("myLogs", "PhotosList saved to: " + noteFileName);
             Toast.makeText(Activity_Note.this,
                     "PhotosList saved to: " + noteFileName, Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
         }
-        catch (IOException e) {}
-
     }
 
 
-    void saveNote()  {
-
-
+    void saveNote() {
 
         // получаем данные из полей ввода
-         name = etName.getText().toString();
-         sku = etSku.getText().toString();
-         category = etCategory.getText().toString();
-         description = etDescription.getText().toString();
+        name = etName.getText().toString();
+        sku = etSku.getText().toString();
+        category = etCategory.getText().toString();
+        description = etDescription.getText().toString();
 
         int id = note.id;
 
@@ -334,10 +328,6 @@ public class Activity_Note extends Activity implements View.OnClickListener{
         note.sku = sku;
         note.category = category;
         note.description = description;
-
-
-
-
 
         saveNoteToTxtFile();
 
@@ -347,11 +337,9 @@ public class Activity_Note extends Activity implements View.OnClickListener{
 
         Intent intent = new Intent();
         intent.putExtra("note", note);
-        Log.d("myLogs","note returned as result of NoteActivity");
+        Log.d("myLogs", "note returned as result of NoteActivity");
         setResult(RESULT_OK, intent);
         finish();
-
-
     }
 
     void saveNoteToDB() {
@@ -364,7 +352,7 @@ public class Activity_Note extends Activity implements View.OnClickListener{
         cv.put("category", note.category);
         cv.put("description", note.description);
         // вставляем запись и получаем ее ID
-        long rowID = db.insert(tableName, null, cv);
+        long rowID = db.insert(tableName+note.id, null, cv);
         Log.d("myLogs", "row inserted, ID = " + rowID);
 
         dbHelper.close();
@@ -419,29 +407,27 @@ public class Activity_Note extends Activity implements View.OnClickListener{
     void saveNoteToTxtFile() {
 
 
-
         String outputString = "NoteID = " + note.id + "\n" + System.getProperty("line.separator")
                 + "NoteNAME = " + note.name + "\n" + System.getProperty("line.separator")
                 + "NoteSKU = " + note.sku + "\n" + System.getProperty("line.separator")
-                + "NoteCATEGORY = " + note.category +  "\n" + System.getProperty("line.separator")
-                + "NoteDESCRIPTION = " + note.description +  "\n" + System.getProperty("line.separator");
+                + "NoteCATEGORY = " + note.category + "\n" + System.getProperty("line.separator")
+                + "NoteDESCRIPTION = " + note.description + "\n" + System.getProperty("line.separator");
 
 
-
-        Log.d("myLogs","preparing to generateNoteDescriptionFileName ");
+        Log.d("myLogs", "preparing to generateNoteDescriptionFileName ");
         Toast.makeText(Activity_Note.this,
                 "preparing to generateNoteDescriptionFileName ", Toast.LENGTH_SHORT).show();
 
 
         String noteFileName = generateNoteDescriptionFileName(note.sku);
 
-        Log.d("myLogs","generateNoteDescriptionFileName: " + noteFileName);
+        Log.d("myLogs", "generateNoteDescriptionFileName: " + noteFileName);
         Toast.makeText(Activity_Note.this,
                 "generateNoteDescriptionFileName: " + noteFileName, Toast.LENGTH_SHORT).show();
 
         try {
             String fileName = noteFileName.substring(8);
-            Log.d("myLogs","fileName: " + fileName);
+            Log.d("myLogs", "fileName: " + fileName);
             Toast.makeText(Activity_Note.this,
                     "fileName: " + fileName, Toast.LENGTH_SHORT).show();
 
@@ -449,11 +435,11 @@ public class Activity_Note extends Activity implements View.OnClickListener{
             OutputStream os = new FileOutputStream(fileName);
             os.write(outputString.getBytes());
             os.close();
-            Log.d("myLogs","Note saved to: " + noteFileName);
+            Log.d("myLogs", "Note saved to: " + noteFileName);
             Toast.makeText(Activity_Note.this,
                     "Note saved to: " + noteFileName, Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
         }
-        catch (IOException e) {}
     }
 
     @Override
@@ -483,9 +469,9 @@ public class Activity_Note extends Activity implements View.OnClickListener{
 
         // Проверяем и создаем директорию
         File path = new File(Environment.getExternalStorageDirectory(),
-                Activity_Note.programDirectoryName + File.separator + Activity_Notes_List.notepadName + File.separator + Activity_Notes_List.noteIndex);
-        if (! path.exists()){
-            if (! path.mkdirs()){
+                Data.programDirectoryName + File.separator + Activity_Notes_List.notepadName + File.separator + Activity_Notes_List.noteIndex);
+        if (!path.exists()) {
+            if (!path.mkdirs()) {
                 return null;
             }
         }
@@ -503,10 +489,10 @@ public class Activity_Note extends Activity implements View.OnClickListener{
             return null;
 
         // Проверяем и создаем директорию
-        File path = new File(Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName +
+        File path = new File(Environment.getExternalStorageDirectory(), Data.programDirectoryName +
                 File.separator + Activity_Notes_List.notepadName + File.separator + Activity_Notes_List.noteIndex);
-        if (! path.exists()){
-            if (! path.mkdirs()){
+        if (!path.exists()) {
+            if (!path.mkdirs()) {
                 return null;
             }
         }

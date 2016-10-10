@@ -35,8 +35,9 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
     static SharedPreferences mSettings;
 
     final static int REQUEST_CODE_NEW_NOTEPAD = 5;
+    final static int REQUEST_CODE_OLD_NOTEPAD = 6;
 
-    final String noteListSerializeFilename = Activity_Note.programDirectoryName + File.separator + APP_PREFERENCES_NOTEPADS_LIST + ".ser";
+    final String noteListSerializeFilename = Data.programDirectoryName + File.separator + APP_PREFERENCES_NOTEPADS_LIST + ".ser";
 
     static ListAdapter adapter;
     static ListView listView;
@@ -48,29 +49,8 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_notepad_select);
-        // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        // setSupportActionBar(toolbar);
 
-        //  dbHelper = new Helper_DB(this);
-
-       /* SQLiteDatabase db = openOrCreateDatabase("db",MODE_PRIVATE,null);
-        db.execSQL("CREATE TABLE IF NOT EXISTS TutorialsPoint(Username VARCHAR,Password VARCHAR);");
-        db.execSQL("INSERT INTO TutorialsPoint VALUES('admin','admin');");
-
-        Cursor resultSet = db.rawQuery("Select * from TutorialsPoint",null);
-        resultSet.moveToFirst();
-        String username = resultSet.getString(1);
-        String password = resultSet.getString(2);*/
-
-        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-
-        btnAddNotepad = (Button) findViewById(R.id.buttonAddNotepad);
-        btnDeleteAllNotepads = (Button) findViewById(R.id.buttonDeleteAlNotepads);
-        btnAddNotepad.setOnClickListener(this);
-        btnDeleteAllNotepads.setOnClickListener(this);
-
-        listView = (ListView) findViewById(R.id.listView);
+        creationInit();
 
         notePadsListInit();
 
@@ -82,14 +62,125 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
                 Intent intent = new Intent();
                 intent.setClass(Activity_Notepad_Select.this, Activity_Notes_List.class);
 
-                intent.putExtra("id", position);
+              //  Notepad putNotepad = notePadsList.get(position);
+
+                intent.putExtra("id", /*putNotepad.id*/ position);
 
                 //запускаем вторую активность
                 // startActivity(intent);
-                startActivityForResult(intent, REQUEST_CODE_NEW_NOTEPAD);
+                startActivityForResult(intent, REQUEST_CODE_OLD_NOTEPAD);
 
             }
         });
+
+    }
+
+    void creationInit() {
+    setContentView(R.layout.activity_notepad_select);
+    // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    // setSupportActionBar(toolbar);
+
+    //  dbHelper = new Helper_DB(this);
+
+       /* SQLiteDatabase db = openOrCreateDatabase("db",MODE_PRIVATE,null);
+        db.execSQL("CREATE TABLE IF NOT EXISTS TutorialsPoint(Username VARCHAR,Password VARCHAR);");
+        db.execSQL("INSERT INTO TutorialsPoint VALUES('admin','admin');");
+
+        Cursor resultSet = db.rawQuery("Select * from TutorialsPoint",null);
+        resultSet.moveToFirst();
+        String username = resultSet.getString(1);
+        String password = resultSet.getString(2);*/
+
+    mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+
+    btnAddNotepad = (Button) findViewById(R.id.buttonAddNotepad);
+    btnDeleteAllNotepads = (Button) findViewById(R.id.buttonDeleteAlNotepads);
+    btnAddNotepad.setOnClickListener(this);
+    btnDeleteAllNotepads.setOnClickListener(this);
+
+    listView = (ListView) findViewById(R.id.listView);}
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent incomingIntent) {
+        super.onActivityResult(requestCode, resultCode, incomingIntent);
+        Log.d("myLogs", "requestCode = " + requestCode + ", resultCode = " + resultCode);
+
+
+        if ((requestCode == REQUEST_CODE_NEW_NOTEPAD) && (resultCode == RESULT_OK)) {
+
+//            int gotNotepadId = incomingIntent.getParcelableExtra("notepadID");
+  //          Log.d("myLogs","gotNotePad ID = " + gotNotepadId);
+
+
+
+            Notepad gotNotePad = (Notepad) incomingIntent.getParcelableExtra("notepad");
+            Log.d("myLogs","gotNotePad ID = " + gotNotePad.id);
+
+            boolean oldNotepad = false;
+
+            Log.d("myLogs","notePadsList.size = " + notePadsList.size());
+
+            for (Notepad notePad : notePadsList) {
+                Log.d("myLogs","notepadID from notepadList = " + notePad.id);
+                if (notePad.id == gotNotePad.id) {
+                    oldNotepad = true;
+                    break;
+                }
+            }
+
+            if (!oldNotepad)
+                notePadsList.add(gotNotePad);
+
+            // сохранение списка блокнотов
+
+            Notepad.saveNotepads(notePadsList);
+            notePadsList = Notepad.readNotepadsListFromFile();
+
+
+            Log.d("myLogs", "gotNotePad read from intent name = " + gotNotePad.name);
+
+            // textView.setText(gotNotePad.name);
+
+            Log.d("myLogs", "NotePad extracted from parcel");
+
+            adapterInit();
+        }
+
+        //
+
+        if ((requestCode == REQUEST_CODE_OLD_NOTEPAD) && (resultCode == RESULT_OK)) {
+
+            Notepad gotNotePad = (Notepad) incomingIntent.getParcelableExtra("notepad");
+
+            boolean oldNotepad = false;
+            for (Notepad notePad : notePadsList) {
+                if (notePad.id == gotNotePad.id) {
+                    oldNotepad = true;
+                    break;
+                }
+            }
+
+            if (!oldNotepad)
+                notePadsList.add(gotNotePad);
+            else {
+//                notePadsList.remove(gotNotePad.id);
+                notePadsList.add(gotNotePad);
+            }
+
+            // сохранение списка блокнотов
+
+            Notepad.saveNotepads(notePadsList);
+            notePadsList = Notepad.readNotepadsListFromFile();
+
+
+            Log.d("myLogs", "gotNotePad read from intent name = " + gotNotePad.name);
+
+            // textView.setText(gotNotePad.name);
+
+            Log.d("myLogs", "NotePad extracted from parcel");
+
+            adapterInit();
+        }
 
     }
 
@@ -187,43 +278,7 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
         listView.setAdapter(adapter);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d("myLogs", "requestCode = " + requestCode + ", resultCode = " + resultCode);
 
-
-        if ((requestCode == REQUEST_CODE_NEW_NOTEPAD) && (resultCode == RESULT_OK)) {
-
-            Notepad gotNotePad = (Notepad) data.getParcelableExtra("notepad");
-
-            boolean oldNotepad = false;
-            for (Notepad notePad : notePadsList) {
-                if (notePad.id == gotNotePad.id) {
-                    oldNotepad = true;
-                    break;
-                }
-            }
-
-            if (!oldNotepad)
-                notePadsList.add(gotNotePad);
-
-            // сохранение списка блокнотов
-
-            Notepad.saveNotepads(notePadsList);
-            notePadsList = Notepad.readNotepadsListFromFile();
-
-
-            Log.d("myLogs", "gotNotePad read from intent name = " + gotNotePad.name);
-
-            // textView.setText(gotNotePad.name);
-
-            Log.d("myLogs", "NotePad extracted from parcel");
-
-            adapterInit();
-        }
-
-    }
 
     @Override
     public void onClick(View v) {

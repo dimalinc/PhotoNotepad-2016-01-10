@@ -1,6 +1,7 @@
 package com.example.k.photonotepad_2016_01_10;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -23,6 +24,23 @@ public class Note implements Parcelable {
     String category;
     String description;
 
+    ArrayList<Image> noteImagesList = new ArrayList<>();
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Note(int id) {
         this.id = id;
@@ -72,7 +90,7 @@ public class Note implements Parcelable {
 
    static ArrayList<Note> readNotesFromFileSystem() {
 
-        File path = new File (Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName +
+        File path = new File (Environment.getExternalStorageDirectory(), Data.programDirectoryName +
                 File.separator + Activity_Notes_List.notepad.name );
 
         return readNotesFromPath(path);

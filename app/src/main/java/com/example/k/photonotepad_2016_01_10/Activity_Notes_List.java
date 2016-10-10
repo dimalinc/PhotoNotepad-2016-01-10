@@ -37,7 +37,7 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
     static String notepadName;
 
-    static int lastId=0;
+    static int lastId = 0;
 
     static Notepad notepad;
 
@@ -58,11 +58,66 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+        creationInit();
+
+        Intent intent = getIntent();
+
+        int gotId = intent.getIntExtra("id",ID_DEFAULT_VALUE);
+
+        Log.d("myLogs","gotID = " + gotId);
+
+        if (gotId == ID_DEFAULT_VALUE) {
+
+            if (mSettings.contains(APP_PREFERENCES_LAST_NOTEPAD_ID)) {
+                // Получаем число из настроек
+                lastId = mSettings.getInt(APP_PREFERENCES_LAST_NOTEPAD_ID, 0);
+            }
+
+            etNotepadName.setText("notepad"+ (lastId+1));
+            //  etNotepadName.setText(notepad.name);
+            etNotepadName.selectAll();
+            notepad = new Notepad();
+            notepad.name = etNotepadName.getText().toString();
+
+
+        } else {
+            notepad = Activity_Notepad_Select.notePadsList.get(gotId);
+            etNotepadName.setText(notepad.name);
+        }
+
+        notepadName = notepad.name;
+
+   // Проверяем и создаем директорию
+       Helper_File.checkAndCreateProgramDir();
+
+        noteListInit();
+
+        adapter = new SimpleAdapter(this, createDataArrayList(), R.layout.note_row,
+                new String[] { "name", "category" }, new int[] {
+                R.id.tv1, R.id.tv2 });
+        listView.setAdapter(adapter);
+
+        //Обрабатываем щелчки на элементах ListView:
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+                Intent intent = new Intent();
+                intent.setClass(Activity_Notes_List.this, Activity_Note.class);
+
+                intent.putExtra("head", position);
+
+                //запускаем вторую активность
+                startActivity(intent);
+            }
+        });
+    }
+
+    void creationInit() {
         setContentView(R.layout.activity_notes_list);
 
         // notepad = (NotePad)getIntent().getExtras().get("newNotepad");
-
 
         listView = (ListView) findViewById(R.id.listView);
 
@@ -84,63 +139,6 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
         etNotepadName = (EditText)findViewById(R.id.etNotepadName);
 
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-
-
-
-        Intent intent = getIntent();
-
-        int id = intent.getIntExtra("id",ID_DEFAULT_VALUE);
-
-        if (id == ID_DEFAULT_VALUE) {
-
-            if (mSettings.contains(APP_PREFERENCES_LAST_NOTEPAD_ID)) {
-                // Получаем число из настроек
-                lastId = mSettings.getInt(APP_PREFERENCES_LAST_NOTEPAD_ID, 0);
-            }
-
-            etNotepadName.setText("notepad"+ (lastId+1));
-            //  etNotepadName.setText(notepad.name);
-            etNotepadName.selectAll();
-            notepad = new Notepad();
-            notepad.name = etNotepadName.getText().toString();
-
-
-        } else {
-            notepad = Activity_Notepad_Select.notePadsList.get(id);
-            etNotepadName.setText(notepad.name);
-        }
-
-        notepadName = notepad.name;
-
-
-
-
-
-
-
-        // Проверяем и создаем директорию
-       Helper_File.checkAndCreateProgramDir();
-
-
-        noteListInit();
-
-        adapter = new SimpleAdapter(this, createDataArrayList(), R.layout.note_row,
-                new String[] { "name", "category" }, new int[] {
-                R.id.tv1, R.id.tv2 });
-        listView.setAdapter(adapter);
-
-        //Обрабатываем щелчки на элементах ListView:
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> a, View v, int position, long id) {
-                Intent intent = new Intent();
-                intent.setClass(Activity_Notes_List.this, Activity_Note.class);
-
-                intent.putExtra("head", position);
-
-                //запускаем вторую активность
-                startActivity(intent);
-            }
-        });
     }
 
     void noteListInit() {
@@ -182,7 +180,7 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
                         "buttonDeleteNote click ", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.buttonCleanProgramDir:
-               Helper_File.deleteFileOrDirRecursievely(new File(Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName));
+               Helper_File.deleteFileOrDirRecursievely(new File(Environment.getExternalStorageDirectory(), Data.programDirectoryName));
                Helper_File.checkAndCreateProgramDir();
                 break;
             case R.id.btnSaveNotepad:
@@ -195,7 +193,7 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
     void createNewNote() {
         noteIndex++;
         // Проверяем и создаем директорию
-        File path = new File (Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName + "/" + notepadName
+        File path = new File (Environment.getExternalStorageDirectory(), Data.programDirectoryName + "/" + notepadName
                 + "/" + noteIndex);
         if (! path.exists()){
             if (!path.mkdirs()) {
@@ -215,6 +213,7 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
         saveNotepadToDB();
 
         Intent intent = new Intent();
+        intent.putExtra("notepadID", notepad.id);
         intent.putExtra("notepad", notepad);
         Log.d("myLogs", "notePad returned as result of NotesListActivity");
         setResult(RESULT_OK, intent);
@@ -261,7 +260,8 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
     protected void onResume() {
         super.onResume();
 
-        listFiles = Helper_File.listFilesWithSubFolders(new File(Environment.getExternalStorageDirectory(),Activity_Note.programDirectoryName));
+        listFiles = Helper_File.listFilesWithSubFolders(new File(Environment.getExternalStorageDirectory(),
+                Data.programDirectoryName));
 
         for (File file:listFiles) {
             Log.d("myLogs", file.getAbsolutePath());

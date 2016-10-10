@@ -25,7 +25,7 @@ public class Helper_File {
     }
 
     static void checkAndCreateProgramDir() {
-        File path = new File (Environment.getExternalStorageDirectory(), Activity_Note.programDirectoryName);
+        File path = new File (Environment.getExternalStorageDirectory(), Data.programDirectoryName);
         if (! path.exists()){
             if (!path.mkdirs()) {
                 //   Toast.makeText(Activity_Notes_List.this, "unable to create program dir", Toast.LENGTH_SHORT).show();
