@@ -1,6 +1,7 @@
 package com.example.k.photonotepad_2016_01_10;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
@@ -32,7 +33,8 @@ public class Notepad implements Parcelable {
 
     public static ArrayList<Notepad> notePadsList= new ArrayList<>();
 
-    static SharedPreferences mSettings;
+    static SharedPreferences mSettings =  Activity_Notepad_Select.mSettings;
+
 
     static int lastId = Activity_Notes_List.lastId;
 

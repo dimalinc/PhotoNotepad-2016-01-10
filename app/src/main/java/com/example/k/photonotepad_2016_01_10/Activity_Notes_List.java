@@ -28,6 +28,8 @@ import java.util.HashMap;
 
 public class Activity_Notes_List extends AppCompatActivity implements View.OnClickListener{
 
+    static Notepad notepad;
+
     public static final int ID_DEFAULT_VALUE = -1;
     public static final String APP_PREFERENCES = "mysettings";
     public static final String APP_PREFERENCES_LAST_NOTEPAD_ID = "last_notepad_id";
@@ -39,7 +41,6 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
     static int lastId = 0;
 
-    static Notepad notepad;
 
     Button addNote, deleteNote,cleanProgramDir, btnSaveNotepad;
 
@@ -71,17 +72,7 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
         if (gotId == ID_DEFAULT_VALUE) {
 
-            if (mSettings.contains(APP_PREFERENCES_LAST_NOTEPAD_ID)) {
-                // Получаем число из настроек
-                lastId = mSettings.getInt(APP_PREFERENCES_LAST_NOTEPAD_ID, 0);
-            }
-
-            etNotepadName.setText("notepad"+ (lastId+1));
-            //  etNotepadName.setText(notepad.name);
-            etNotepadName.selectAll();
-            notepad = new Notepad();
-            notepad.name = etNotepadName.getText().toString();
-
+            createNewNotepad();
 
         } else {
             notepad = Activity_Notepad_Select.notePadsList.get(gotId);
@@ -95,23 +86,40 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
         noteListInit();
 
-        adapter = new SimpleAdapter(this, createDataArrayList(), R.layout.note_row,
-                new String[] { "name", "category" }, new int[] {
-                R.id.tv1, R.id.tv2 });
-        listView.setAdapter(adapter);
+        if (!noteList.isEmpty()) {
+            adapter = new SimpleAdapter(this, createDataArrayList(), R.layout.note_row,
+                    new String[]{"name", "category"}, new int[]{
+                    R.id.tv1, R.id.tv2});
+            listView.setAdapter(adapter);
 
-        //Обрабатываем щелчки на элементах ListView:
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> a, View v, int position, long id) {
-                Intent intent = new Intent();
-                intent.setClass(Activity_Notes_List.this, Activity_Note.class);
+            //Обрабатываем щелчки на элементах ListView:
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+                    Intent intent = new Intent();
+                    intent.setClass(Activity_Notes_List.this, Activity_Note.class);
 
-                intent.putExtra("head", position);
+                    intent.putExtra("head", position);
 
-                //запускаем вторую активность
-                startActivity(intent);
-            }
-        });
+                    //запускаем вторую активность
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
+    void createNewNotepad() {
+        notepad = new Notepad();
+
+        if (mSettings.contains(APP_PREFERENCES_LAST_NOTEPAD_ID)) {
+            // Получаем число из настроек
+            lastId = mSettings.getInt(APP_PREFERENCES_LAST_NOTEPAD_ID, 0);
+        }
+
+        etNotepadName.setText("notepad" + (lastId /*+ 1*/));
+        //  etNotepadName.setText(notepad.name);
+        etNotepadName.selectAll();
+
+        notepad.name = etNotepadName.getText().toString();
     }
 
     void creationInit() {
@@ -210,12 +218,14 @@ public class Activity_Notes_List extends AppCompatActivity implements View.OnCli
 
 // TODO: решить, перенести в класс Notepad или оставить здесть
 
-        saveNotepadToDB();
+        //saveNotepadToDB();
+
+        notepad.name = etNotepadName.getText().toString();
 
         Intent intent = new Intent();
         intent.putExtra("notepadID", notepad.id);
         intent.putExtra("notepad", notepad);
-        Log.d("myLogs", "notePad returned as result of NotesListActivity");
+        Log.d("myLogs", "notePad with id = " + notepad.id + " returned as result of NotesListActivity");
         setResult(RESULT_OK, intent);
         finish(); // оставить или убрать?
         Log.d("myLogs", "finish() called in saveNotePad()");

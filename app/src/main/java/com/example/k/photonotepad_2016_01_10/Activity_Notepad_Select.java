@@ -69,7 +69,6 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
                 //запускаем вторую активность
                 // startActivity(intent);
                 startActivityForResult(intent, REQUEST_CODE_OLD_NOTEPAD);
-
             }
         });
 
@@ -89,8 +88,8 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
         Cursor resultSet = db.rawQuery("Select * from TutorialsPoint",null);
         resultSet.moveToFirst();
         String username = resultSet.getString(1);
-        String password = resultSet.getString(2);*/
-
+        String password = resultSet.getString(2);
+*/
     mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 
     btnAddNotepad = (Button) findViewById(R.id.buttonAddNotepad);
@@ -100,16 +99,64 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
     listView = (ListView) findViewById(R.id.listView);}
 
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent incomingIntent) {
         super.onActivityResult(requestCode, resultCode, incomingIntent);
+
+        if   (resultCode == RESULT_OK) {
+
+            Notepad gotNotePad = (Notepad) incomingIntent.getParcelableExtra("notepad");
+
+
+            for (Notepad eachNotepad: notePadsList) {
+                if (eachNotepad.id == gotNotePad.id) {
+
+                    Log.d("myLogs","eachNotepad.id == gotNotePad.id");
+
+                    Log.d("myLogs", "gotNotePad.id = " + gotNotePad.id);
+
+                    notePadsList.set(eachNotepad.id,gotNotePad);
+
+                    saveAndReinitNotepadsList();
+
+                    break;
+
+                } else {
+
+                    Log.d("myLogs","eachNotepad.id != gotNotePad.id");
+
+                    notePadsList.add(gotNotePad);
+
+                    saveAndReinitNotepadsList();
+
+                }
+            }
+        }
+
+    }
+
+    void saveAndReinitNotepadsList() {
+        Notepad.saveNotepads(notePadsList);
+        notePadsList = Notepad.readNotepadsListFromFile();
+
+
+
+        adapterInit();
+
+
+    }*/
+
+    /*void onActivityResultOldCode() {*/
+
+       /* protected void onActivityResult(int requestCode, int resultCode, Intent incomingIntent) {
+
         Log.d("myLogs", "requestCode = " + requestCode + ", resultCode = " + resultCode);
 
 
-        if ((requestCode == REQUEST_CODE_NEW_NOTEPAD) && (resultCode == RESULT_OK)) {
+        if ( *//*(requestCode == REQUEST_CODE_NEW_NOTEPAD) &&*//* (resultCode == RESULT_OK)) {
 
 //            int gotNotepadId = incomingIntent.getParcelableExtra("notepadID");
-  //          Log.d("myLogs","gotNotePad ID = " + gotNotepadId);
+            //          Log.d("myLogs","gotNotePad ID = " + gotNotepadId);
 
 
 
@@ -118,14 +165,18 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
             boolean oldNotepad = false;
 
-            Log.d("myLogs","notePadsList.size = " + notePadsList.size());
+            Log.d("myLogs", "notePadsList.size = " + notePadsList.size());
 
             for (Notepad notePad : notePadsList) {
                 Log.d("myLogs","notepadID from notepadList = " + notePad.id);
                 if (notePad.id == gotNotePad.id) {
+
+                    Log.d("myLogs","notePad.id == gotNotePad.id");
                     oldNotepad = true;
+                    notePadsList.set(notePad.id-1,gotNotePad);
                     break;
                 }
+
             }
 
             if (!oldNotepad)
@@ -135,7 +186,6 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
             Notepad.saveNotepads(notePadsList);
             notePadsList = Notepad.readNotepadsListFromFile();
-
 
             Log.d("myLogs", "gotNotePad read from intent name = " + gotNotePad.name);
 
@@ -181,8 +231,80 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
             adapterInit();
         }
+    }*/
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent incomingIntent) {
+
+        Log.d("myLogs","resultCode = " + resultCode);
+
+        if (requestCode == REQUEST_CODE_NEW_NOTEPAD)
+        if ( resultCode == RESULT_OK ) {
+
+            Log.d("myLogs","REQUEST_CODE_NEW_NOTEPAD + RESULT_OK");
+
+            Notepad gotNotePad = (Notepad) incomingIntent.getParcelableExtra("notepad");
+
+            Log.d("myLogs","gotNotePad.id = " + gotNotePad.id);
+
+            notePadsList.add(gotNotePad);
+
+            Notepad.saveNotepads(notePadsList);
+            notePadsList = Notepad.readNotepadsListFromFile();
+
+            //notePadsListInit();
+            adapterInit();
+        }
+
+        if (requestCode == REQUEST_CODE_OLD_NOTEPAD)
+            if ( resultCode == RESULT_OK ) {
+
+                Log.d("myLogs","REQUEST_CODE_OLD_NOTEPAD + RESULT_OK");
+
+                Notepad gotNotePad = (Notepad) incomingIntent.getParcelableExtra("notepad");
+
+                for (Notepad eachNotepad: notePadsList) {
+                    if (eachNotepad.id == gotNotePad.id)
+                        notePadsList.set(notePadsList.indexOf(eachNotepad),gotNotePad);
+                }
+
+
+
+                Notepad.saveNotepads(notePadsList);
+                notePadsList = Notepad.readNotepadsListFromFile();
+
+                //notePadsListInit();
+                adapterInit();
+            }
 
     }
+
+    void adapterInit() {
+        adapter = new SimpleAdapter(this, Helper_Adapter.createDataArrayList(), R.layout.notepad_row,
+                new String[]{"name", "date"}, new int[]{
+                R.id.tvNotepadName, R.id.tvNotepadDate});
+        listView.setAdapter(adapter);
+    }
+
+    void checkGotNotepadOld(Notepad gotNotepad) {
+        for (Notepad eachNotepad: notePadsList) {
+            Log.d("myLogs","eachnotepad.id" + eachNotepad.id);
+            Log.d("myLogs","gotNotepad.id" + gotNotepad.id);
+            if (eachNotepad.id == gotNotepad.id) {
+                notePadsList.set(notePadsList.indexOf(eachNotepad), gotNotepad);
+
+                Log.d("myLogs", "notePadsList.set(notePadsList.indexOf(eachNotepad), gotNotepad)");
+
+                break;
+            } else {
+                notePadsList.add(gotNotepad);
+                Log.d("myLogs","notePadsList.add(gotNotepad)");
+            }
+        }
+
+    }
+
+
 
     void readNotepadsFromDB() {
 
@@ -271,12 +393,7 @@ public class Activity_Notepad_Select extends Activity implements View.OnClickLis
 
     }
 
-    void adapterInit() {
-        adapter = new SimpleAdapter(this, Helper_Adapter.createDataArrayList(), R.layout.notepad_row,
-                new String[]{"name", "date"}, new int[]{
-                R.id.tvNotepadName, R.id.tvNotepadDate});
-        listView.setAdapter(adapter);
-    }
+
 
 
 
